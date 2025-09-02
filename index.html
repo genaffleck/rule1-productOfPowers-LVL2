@@ -266,19 +266,31 @@
                 const letters = "abcdefghijklmnopqrstuvwxyz";
                 return letters[Math.floor(Math.random() * letters.length)];
             }
+
+            // Standard formatting (allows exponent 1)
             function formatVarPow(variable, k) {
                 if (k === 0) return "1";
                 if (k === 1) return `${variable}`;
                 return `${variable}^{${k}}`;
             }
-            function formatFraction(variable, exp, coeff = 1) {
-                const posExp = -exp;
-                return coeff === 1
-                    ? `\\frac{1}{${variable}^{${posExp}}}`
-                    : `\\frac{${coeff}}{${variable}^{${posExp}}}`;
+
+            // Final-answer formatting (never shows exponent 1)
+            function formatFinalVarPow(variable, k) {
+                if (k === 0) return "";
+                if (k === 1) return `${variable}`;
+                return `${variable}^{${k}}`;
             }
 
-            // Format exponent sum with parentheses for negatives
+            // Fractions for negative exponents (hide ^1)
+            function formatFraction(variable, exp, coeff = 1) {
+                const posExp = -exp;
+                let denominator =
+                    posExp === 1 ? `${variable}` : `${variable}^{${posExp}}`;
+                return coeff === 1
+                    ? `\\frac{1}{${denominator}}`
+                    : `\\frac{${coeff}}{${denominator}}`;
+            }
+
             function formatExponentSum(m, n) {
                 return n < 0 ? `${m}+(${n})` : `${m}+${n}`;
             }
@@ -304,7 +316,7 @@
                     steps.push(`\\(= ${v}^{${formatExponentSum(m, n)}}\\)`);
 
                     if (sum > 0) {
-                        steps.push(`\\(= ${v}^{${sum}}\\)`);
+                        steps.push(`\\(= ${formatFinalVarPow(v, sum)}\\)`);
                     } else if (sum === 0) {
                         steps.push(`\\(= 1\\)`);
                     } else {
@@ -330,7 +342,9 @@
                     );
 
                     if (sum > 0) {
-                        steps.push(`\\(= ${a * b}${v}^{${sum}}\\)`);
+                        steps.push(
+                            `\\(= ${a * b}${formatFinalVarPow(v, sum)}\\)`
+                        );
                     } else if (sum === 0) {
                         steps.push(`\\(= ${a * b}\\)`);
                     } else {
